@@ -4,7 +4,7 @@ import "context"
 
 type Storage struct {
 	Card interface {
-		Add(context.Context,Card) error 
+		Add(context.Context,*Card) error 
 	}
 }
 

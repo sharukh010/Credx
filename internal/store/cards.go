@@ -10,7 +10,7 @@ var cardID int64 = 0
 type Card struct {
 	ID     int64      `json:"id"`
 	Name   string     `json:"name"`
-	Number cardNumber 
+	Number string `json:"number"`
 	ExpireAt string `json:"expire_at"`
 	Version int `json:"version"`
 	CreatedAt time.Time `json:"created_at"`
@@ -33,14 +33,10 @@ func (c *Card) updateVersion(){
 	c.Version += 1
 }
 
-type cardNumber struct {
-	Number string `json:"number"`
-}
-
-func (cn *cardNumber) GenerateNumber(num string) {
+func (c *Card) MaskNumber(number string){
 	base := "XXXX"
-	cn.Number = strings.Repeat(base,3)
-	cn.Number += num 
+	c.Number = strings.Repeat(base,3)
+	c.Number += number
 }
 
 
@@ -53,11 +49,11 @@ type CardStore struct {
 
 }
 
-func (s *CardStore) Add(ctx context.Context,card Card) error {
+func (s *CardStore) Add(ctx context.Context,card *Card) error {
 
-	setID(&card,&cardID)
-	setCreatedAt(&card)
-	setUpdatedAt(&card)
+	setID(card,&cardID)
+	setCreatedAt(card)
+	setUpdatedAt(card)
 	card.updateVersion()
 
 	return nil 

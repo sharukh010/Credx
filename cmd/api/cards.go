@@ -9,9 +9,9 @@ import (
 )
 
 type AddCardRequest struct {
-	Name string `json:"name" validate:"required,min=5"`
-	Number string `json:"number" validate:"required,min=4,max=4"`
-	ExpireAt string `json:"expire_at" validate:"required,min=4,max=4"`
+	Name string `json:"name" binding:"required,min=5"`
+	Number string `json:"number" binding:"required,min=4,max=4"`
+	ExpireAt string `json:"expire_at" binding:"required,min=5,max=5"`
 
 }
 func (app *application) getCardsHandler(c *gin.Context){
@@ -29,11 +29,11 @@ func (app *application) addCardHandler(c *gin.Context){
 		return 
 	}
 	
-	card := store.Card{
+	card := &store.Card{
 		Name: r.Name,
 		ExpireAt: r.ExpireAt,
 	}
-	card.Number.GenerateNumber(r.Number)
+	card.MaskNumber(r.Number)
 
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
