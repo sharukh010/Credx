@@ -21,14 +21,17 @@ func (app *application) mount() http.Handler{
 	r := gin.Default()
 
 	v1 := r.Group("/v1")
-	// credit card routes 
-	v1.GET("/card",getCardsHandler)
-	v1.GET("/card/:id",getCardByIDHandler)
-	// route to add card 
-	v1.POST("/card",addCardHandler)
-	v1.PATCH("/card/:id",updateCardHandler)
-	v1.DELETE("/card/:id",deleteCardHandler)
+	// health route
+	v1.GET("/health",getHealthHandler)
 
+	card := v1.Group("/card")
+	// credit card routes 
+	card.GET("/",getCardsHandler)
+	card.GET("/:id",getCardByIDHandler)
+	// route to add card 
+	card.POST("/",addCardHandler)
+	card.PATCH("/:id",updateCardHandler)
+	card.DELETE("/:id",deleteCardHandler)
 
 
 	// authentication routes
