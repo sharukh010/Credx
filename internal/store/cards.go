@@ -11,6 +11,7 @@ type Card struct {
 	ID     int64      `json:"id"`
 	Name   string     `json:"name"`
 	Number cardNumber 
+	ExpireAt string `json:"expire_at"`
 	Version int `json:"version"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -36,17 +37,17 @@ type cardNumber struct {
 	Number string `json:"number"`
 }
 
-func (cn *cardNumber) generateNumber(num string) {
+func (cn *cardNumber) GenerateNumber(num string) {
 	base := "XXXX"
 	cn.Number = strings.Repeat(base,3)
 	cn.Number += num 
 }
 
 
-func generateCardID() int64 {
-	cardID += 1 
-	return cardID
-}
+// func generateCardID() int64 {
+// 	cardID += 1 
+// 	return cardID
+// }
 
 type CardStore struct {
 

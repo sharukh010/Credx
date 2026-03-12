@@ -11,7 +11,7 @@ type HealthResponse struct {
 	Version string `json:"version"`
 	Environment string `json:"environment"`
 }
-func getHealthHandler(c *gin.Context){
+func (app *application) getHealthHandler(c *gin.Context){
 	r := HealthResponse{
 		Status: "Alive",
 		Version: version,

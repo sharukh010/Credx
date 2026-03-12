@@ -1,23 +1,55 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"net/http"
 
-func getCardsHandler(c *gin.Context){
+	"github.com/gin-gonic/gin"
+	"github.com/sharukh010/credx/internal/store"
+)
+
+type AddCardRequest struct {
+	Name string `json:"name" validate:"required,min=5"`
+	Number string `json:"number" validate:"required,min=4,max=4"`
+	ExpireAt string `json:"expire_at" validate:"required,min=4,max=4"`
+
+}
+func (app *application) getCardsHandler(c *gin.Context){
 	notImplementedError(c)
 }
 
-func getCardByIDHandler(c *gin.Context){
+func (app *application) getCardByIDHandler(c *gin.Context){
 	notImplementedError(c)
 }
 
-func addCardHandler(c *gin.Context){
+func (app *application) addCardHandler(c *gin.Context){
+	r := &AddCardRequest{}
+	if err := c.BindJSON(r); err != nil {
+		badRequestResponse(c,err)
+		return 
+	}
+	
+	card := store.Card{
+		Name: r.Name,
+		ExpireAt: r.ExpireAt,
+	}
+	card.Number.GenerateNumber(r.Number)
+
+	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
+	defer cancel()
+
+	if err := app.store.Card.Add(ctx,card); err != nil {
+		internalServerErrorResponse(c,err)
+		return 
+	}
+
+	jsonResponse(c,http.StatusCreated,card)
+}
+
+func (app *application) updateCardHandler(c *gin.Context){
 	notImplementedError(c)
 }
 
-func updateCardHandler(c *gin.Context){
-	notImplementedError(c)
-}
-
-func deleteCardHandler(c *gin.Context){
+func (app *application) deleteCardHandler(c *gin.Context){
 	notImplementedError(c)
 }

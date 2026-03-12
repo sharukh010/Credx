@@ -1,6 +1,10 @@
 package main
 
-import "log"
+import (
+	"log"
+
+	"github.com/sharukh010/credx/internal/store"
+)
 
 func main() {
 	cfg := config{
@@ -8,7 +12,8 @@ func main() {
 	}
 	
 	api := &application{
-		Config: cfg,
+		config: cfg,
+		store: store.NewStorage(),
 	}
 
 	mux := api.mount()
