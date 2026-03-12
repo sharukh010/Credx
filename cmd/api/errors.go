@@ -13,6 +13,7 @@ var (
 	ErrBadRequest = errors.New("bad request")
 	ErrInternalServer = errors.New("something went wrong")
 	ErrNotFound = errors.New("not found")
+	ErrInvalidUpdateRequest = errors.New("invalid update request")
 )
 type ErrorResponse struct {
 	Error string `json:"error"`

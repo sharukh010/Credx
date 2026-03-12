@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"time"
 )
@@ -63,4 +64,50 @@ func (s *CardStore) Add(ctx context.Context,card *Card) error {
 
 func (s *CardStore) GetAll(ctx context.Context) ([]Card,error){
 	return Cards,nil 
+}
+
+func (s *CardStore) GetByID(ctx context.Context,ID int64) (*Card,error){
+	for _,card := range Cards {
+		if card.ID == ID {
+			return &card,nil
+		}
+	}
+	return nil,sql.ErrNoRows
+}
+
+func (s *CardStore) Update(ctx context.Context,c *Card) error {
+	var idx int
+	idx = getCardIndex(c.ID)
+	if idx == -1 {
+		return sql.ErrNoRows
+	}
+	c.updateVersion()
+	Cards[idx] = *c 
+	return nil 
+}
+
+func (s *CardStore) Delete(ctx context.Context,ID int64) error {
+	var idx int
+	idx = getCardIndex(ID)
+	if idx == -1 {
+		return sql.ErrNoRows
+	}
+	Cards = append(Cards[:idx],Cards[idx+1:]...)
+	return nil 
+}
+
+func getCardIndex(ID int64) int {
+	var exists bool 
+	var idx int
+	for i,card := range Cards {
+		if card.ID == ID {
+			exists = true
+			idx = i
+			break
+		}
+	}
+	if !exists {
+		return -1
+	}
+	return idx 
 }
