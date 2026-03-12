@@ -24,7 +24,7 @@ func (app *application) mount() http.Handler{
 	// health route
 	v1.GET("/health",getHealthHandler)
 
-	card := v1.Group("/card")
+	card := v1.Group("/cards")
 	// credit card routes 
 	card.GET("/",getCardsHandler) // get all the cards
 	card.GET("/:id",getCardByIDHandler) // get card by id 
