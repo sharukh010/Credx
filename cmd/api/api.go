@@ -26,15 +26,19 @@ func (app *application) mount() http.Handler{
 
 	card := v1.Group("/card")
 	// credit card routes 
-	card.GET("/",getCardsHandler)
-	card.GET("/:id",getCardByIDHandler)
-	// route to add card 
-	card.POST("/",addCardHandler)
-	card.PATCH("/:id",updateCardHandler)
-	card.DELETE("/:id",deleteCardHandler)
-
+	card.GET("/",getCardsHandler) // get all the cards
+	card.GET("/:id",getCardByIDHandler) // get card by id 
+	card.POST("/",addCardHandler) // add card 
+	card.PATCH("/:id",updateCardHandler) // update card details
+	card.DELETE("/:id",deleteCardHandler) // delete card by id 
 
 	// authentication routes
+	auth := v1.Group("/auth")
+
+	auth.POST("/register",userRegistrationHandler) // rotue to register user
+	auth.GET("/log-in",userLoginHandler)
+
+
 	return r 
 }
 
