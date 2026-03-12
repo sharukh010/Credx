@@ -56,5 +56,11 @@ func (s *CardStore) Add(ctx context.Context,card *Card) error {
 	setUpdatedAt(card)
 	card.updateVersion()
 
+	Cards = append(Cards, *card)
+
 	return nil 
+}
+
+func (s *CardStore) GetAll(ctx context.Context) ([]Card,error){
+	return Cards,nil 
 }

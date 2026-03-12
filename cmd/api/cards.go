@@ -15,7 +15,15 @@ type AddCardRequest struct {
 
 }
 func (app *application) getCardsHandler(c *gin.Context){
-	notImplementedError(c)
+	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
+	defer cancel()
+
+	cards,err := app.store.Cards.GetAll(ctx)
+	if err != nil {
+		internalServerErrorResponse(c,err)
+		return 
+	}
+	jsonResponse(c,http.StatusOK,cards)
 }
 
 func (app *application) getCardByIDHandler(c *gin.Context){
@@ -38,7 +46,7 @@ func (app *application) addCardHandler(c *gin.Context){
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
 
-	if err := app.store.Card.Add(ctx,card); err != nil {
+	if err := app.store.Cards.Add(ctx,card); err != nil {
 		internalServerErrorResponse(c,err)
 		return 
 	}
