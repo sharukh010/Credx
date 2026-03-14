@@ -116,7 +116,7 @@ func (app *application) userLoginHandler(c *gin.Context){
 		Email: user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt: jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Minute)),//change this while deploying 
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),//change this while deploying 
 			Issuer: "credx",
 		},
 
