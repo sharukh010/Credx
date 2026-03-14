@@ -58,6 +58,8 @@ func (app *application) getCardByIDHandler(c *gin.Context){
 }
 
 func (app *application) addCardHandler(c *gin.Context){
+	userID := c.Value("userID").(int64)
+	
 	r := &AddCardRequest{}
 	if err := c.BindJSON(r); err != nil {
 		badRequestResponse(c,err)
@@ -67,6 +69,7 @@ func (app *application) addCardHandler(c *gin.Context){
 	card := &store.Card{
 		Name: r.Name,
 		ExpireAt: r.ExpireAt,
+		UserID: userID,
 	}
 	card.MaskNumber(r.Number)
 

@@ -10,6 +10,7 @@ import (
 var cardID int64 = 0
 type Card struct {
 	ID     int64      `json:"id"`
+	UserID int64	  `json:"user_id"`
 	Name   string     `json:"name"`
 	Number string `json:"number"`
 	ExpireAt string `json:"expire_at"`
