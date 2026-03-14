@@ -44,8 +44,9 @@ func (s *CardStore) Add(ctx context.Context,card *Card) error {
 }
 
 func (s *CardStore) GetAll(ctx context.Context) ([]Card,error){
+	userID := ctx.Value("UserID")
 	cards := []Card{}
-	result := s.db.Order("id ASC").Find(&cards)
+	result := s.db.Where("user_id = ?",userID).Order("id ASC").Find(&cards)
 	if result.Error != nil {
 		return nil,result.Error 
 	}
@@ -53,8 +54,9 @@ func (s *CardStore) GetAll(ctx context.Context) ([]Card,error){
 }
 
 func (s *CardStore) GetByID(ctx context.Context,ID int64) (*Card,error){
+	userID := ctx.Value("UserID")
 	card := &Card{}
-	result := s.db.Where("id = ?",ID).Find(card)
+	result := s.db.Where("id = ?",ID).Where("user_id = ?",userID).Find(card)
 	if result.Error != nil {
 		return nil,result.Error 
 	}
@@ -67,7 +69,7 @@ func (s *CardStore) GetByID(ctx context.Context,ID int64) (*Card,error){
 
 func (s *CardStore) Update(ctx context.Context,c *Card) error {
 
-	result := s.db.Where("id = ?",c.ID).Updates(c)
+	result := s.db.Where("id = ?",c.ID).Where("user_id = ?",c.UserID).Updates(c)
 	if result.Error != nil {
 		return result.Error 
 	}
@@ -78,8 +80,9 @@ func (s *CardStore) Update(ctx context.Context,c *Card) error {
 }
 
 func (s *CardStore) Delete(ctx context.Context,ID int64) error {
+	userID := ctx.Value("UserID")
 	card := &Card{}
-	result := s.db.Where("id = ?",ID).Delete(card)
+	result := s.db.Where("user_id = ?",userID).Where("id = ?",ID).Delete(card)
 	if result.Error != nil {
 		return result.Error 
 	}

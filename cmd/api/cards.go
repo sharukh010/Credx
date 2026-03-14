@@ -32,8 +32,10 @@ type UpdateCardRequest struct {
 // @Failure 500 {object} ErrorResponse
 // @Router /cards/ [get]
 func (app *application) getCardsHandler(c *gin.Context){
+	userID := c.Value("userID").(int64)
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
+	ctx = context.WithValue(ctx,"UserID",userID)
 
 	cards,err := app.store.Cards.GetAll(ctx)
 	if err != nil {
@@ -55,6 +57,7 @@ func (app *application) getCardsHandler(c *gin.Context){
 // @Failure 500 {object} ErrorResponse
 // @Router /cards/{id} [get]
 func (app *application) getCardByIDHandler(c *gin.Context){
+	userID := c.Value("userID").(int64)
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {
 		internalServerErrorResponse(c,err)
@@ -63,6 +66,7 @@ func (app *application) getCardByIDHandler(c *gin.Context){
 
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
+	ctx = context.WithValue(ctx,"UserID",userID)
 	
 	card, err := app.store.Cards.GetByID(ctx,id)
 	if err != nil {
@@ -131,6 +135,7 @@ func (app *application) addCardHandler(c *gin.Context){
 // @Failure 500 {object} ErrorResponse
 // @Router /cards/{id} [patch]
 func (app *application) updateCardHandler(c *gin.Context){
+	userID := c.Value("userID").(int64)
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {
 		internalServerErrorResponse(c,err)
@@ -139,6 +144,7 @@ func (app *application) updateCardHandler(c *gin.Context){
 
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
+	ctx = context.WithValue(ctx,"UserID",userID)
 
 	card,err := app.store.Cards.GetByID(ctx,id)
 	if err != nil {
@@ -175,6 +181,7 @@ func (app *application) updateCardHandler(c *gin.Context){
 
 	ctx,cancel = context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
+	ctx = context.WithValue(ctx,"UserID",userID)
 
 	if err := app.store.Cards.Update(ctx,card); err != nil {
 		internalServerErrorResponse(c,err)
@@ -195,6 +202,7 @@ func (app *application) updateCardHandler(c *gin.Context){
 // @Failure 500 {object} ErrorResponse
 // @Router /cards/{id} [delete]
 func (app *application) deleteCardHandler(c *gin.Context){
+	userID := c.Value("userID").(int64)
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {
 		internalServerErrorResponse(c,err)
@@ -203,6 +211,7 @@ func (app *application) deleteCardHandler(c *gin.Context){
 
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
+	ctx = context.WithValue(ctx,"UserID",userID)
 
 	if err := app.store.Cards.Delete(ctx,id); err != nil {
 		switch err {
