@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 var cardID int64 = 0
@@ -48,6 +50,7 @@ func (c *Card) MaskNumber(number string){
 // }
 
 type CardStore struct {
+	db *gorm.DB
 
 }
 

@@ -121,7 +121,7 @@ func (app *application) userLoginHandler(c *gin.Context){
 		},
 
 	}
-	token,err := auth.GenerateJWT(claims)
+	token,err := auth.GenerateJWT(claims,app.config.JWTSecret)
 	if err != nil {
 		internalServerErrorResponse(c,err)
 		return 
@@ -134,7 +134,7 @@ func (app *application) userLoginHandler(c *gin.Context){
 	jsonResponse(c,http.StatusOK,response)
 }
 
-func authMiddleware() gin.HandlerFunc {
+func (app *application) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context){
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -145,7 +145,7 @@ func authMiddleware() gin.HandlerFunc {
 
 		tokenStr := strings.TrimPrefix(authHeader,"Bearer ")
 
-		claims,err := auth.ParseJWT(tokenStr)
+		claims,err := auth.ParseJWT(tokenStr,app.config.JWTSecret)
 		if err != nil {
 			unauthorizedResponse(c,fmt.Errorf("%s Invalid",USERTOKEN))
 			c.Abort()

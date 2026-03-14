@@ -12,14 +12,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var jwtSecret = []byte("my-secret")
-
-func GenerateJWT(c Claims) (string,error){
+func GenerateJWT(c Claims,jwtSecret []byte) (string,error){
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,c)
 	return token.SignedString(jwtSecret)
 }
 
-func ParseJWT(tokenString string) (*Claims,error){
+func ParseJWT(tokenString string,jwtSecret []byte) (*Claims,error){
 	token,err := jwt.ParseWithClaims(tokenString,&Claims{},func(t *jwt.Token) (interface{},error){
 		if _ , ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])

@@ -3,17 +3,36 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
+	"github.com/sharukh010/credx/internal/db"
+	"github.com/sharukh010/credx/internal/env"
 	"github.com/sharukh010/credx/internal/store"
 )
 
 func main() {
+	if err := godotenv.Load();err != nil {
+		log.Fatalln("Error loading .env file")
+	}
+
 	cfg := config{
-		Addr: ":8080",
+		Addr: env.GetString("SERVER_ADDR",":8080"),
+		dbConfig: dbConfig{
+			Addr: env.GetString("DB_ADDR","host=localhost user=admin password=adminpassword dbname=credx port=5432 sslmode=disable"),
+		},
+		env: env.GetString("ENV","development"),
+		JWTSecret: []byte(env.GetString("JWT_SECRET","MY_SECRET")),
 	}
 	
+	db,err := db.New(cfg.dbConfig.Addr)
+	if err != nil {
+		log.Fatalf("Unable to Connect to DB Error: %v\n",err)
+	}
+
+	store := store.NewStorage(db)
+
 	api := &application{
 		config: cfg,
-		store: store.NewStorage(),
+		store: store,
 	}
 
 	mux := api.mount()

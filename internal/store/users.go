@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var UserID int64 = 0 
@@ -28,6 +29,7 @@ type Name struct {
 }
 
 type UserStore struct {
+	db *gorm.DB
 
 }
 

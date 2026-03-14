@@ -15,7 +15,7 @@ func (app *application) getHealthHandler(c *gin.Context){
 	r := HealthResponse{
 		Status: "Alive",
 		Version: version,
-		Environment: "development",
+		Environment: app.config.env,
 	}
 
 	c.JSON(http.StatusOK,r)

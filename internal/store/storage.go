@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+
+	"gorm.io/gorm"
 )
 
 type Storage struct {
@@ -18,9 +20,9 @@ type Storage struct {
 	}
 }
 
-func NewStorage() Storage {
+func NewStorage(db *gorm.DB) Storage {
 	return Storage{
-		Cards: &CardStore{},
-		Users: &UserStore{},
+		Cards: &CardStore{db:db},
+		Users: &UserStore{db:db},
 	}
 }

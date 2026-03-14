@@ -27,8 +27,14 @@ type application struct {
 
 type config struct {
 	Addr string 
+	JWTSecret []byte 
+	dbConfig dbConfig
+	env string 
 }
 
+type dbConfig struct {
+	Addr string 
+}
 func (app *application) mount() http.Handler{
 	r := gin.Default()
 
@@ -37,7 +43,7 @@ func (app *application) mount() http.Handler{
 	v1.GET("/health",app.getHealthHandler)
 
 	card := v1.Group("/cards")
-	card.Use(authMiddleware())
+	card.Use(app.AuthMiddleware())
 	// credit card routes 
 	card.GET("/",app.getCardsHandler) // get all the cards
 	card.GET("/:id",app.getCardByIDHandler) // get card by id 
