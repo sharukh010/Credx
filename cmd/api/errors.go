@@ -15,6 +15,7 @@ var (
 	ErrNotFound = errors.New("not found")
 	ErrInvalidUpdateRequest = errors.New("invalid update request")
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUnauthorized = errors.New("unauthorized")
 )
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -50,10 +51,18 @@ func notFoundResponse(c *gin.Context,err error){
 	c.JSON(http.StatusNotFound,response)
 }
 
-func invalidCredentials(c *gin.Context,err error){
+func invalidCredentialsResponse(c *gin.Context,err error){
 	response := ErrorResponse{
 		Error: ErrInvalidCredentials.Error(),
 	}
 	log.Printf("Invalid Credentials Error: %v\n",err.Error())
+	c.JSON(http.StatusUnauthorized,response)
+}
+
+func unauthorizedResponse(c *gin.Context,err error){
+	response := ErrorResponse{
+		Error : ErrUnauthorized.Error(),
+	}
+	log.Printf("Unauthorized Error: %v\n",err.Error())
 	c.JSON(http.StatusUnauthorized,response)
 }

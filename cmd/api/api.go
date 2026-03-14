@@ -9,8 +9,15 @@ import (
 	"github.com/sharukh010/credx/internal/store"
 )
 
-var version = "1.0.0"
-var DatabaseOperationsTimeOut = 15 * time.Second
+
+var(
+	version = "1.0.0"
+	DatabaseOperationsTimeOut = 15 * time.Second
+)
+
+const (
+	USERTOKEN = "User-Token"
+)
 
 
 type application struct {
@@ -30,6 +37,7 @@ func (app *application) mount() http.Handler{
 	v1.GET("/health",app.getHealthHandler)
 
 	card := v1.Group("/cards")
+	card.Use(authMiddleware())
 	// credit card routes 
 	card.GET("/",app.getCardsHandler) // get all the cards
 	card.GET("/:id",app.getCardByIDHandler) // get card by id 

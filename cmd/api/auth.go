@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -105,7 +107,7 @@ func (app *application) userLoginHandler(c *gin.Context){
 	}
 
 	if err := store.CompareHashAndPassword(user.Password,r.Password); err != nil {
-		invalidCredentials(c,err)
+		invalidCredentialsResponse(c,err)
 		return 
 	}
 
@@ -130,4 +132,28 @@ func (app *application) userLoginHandler(c *gin.Context){
 	}
 
 	jsonResponse(c,http.StatusOK,response)
+}
+
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context){
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			unauthorizedResponse(c,fmt.Errorf("%s Missing",USERTOKEN))
+			c.Abort()
+			return 
+		}
+
+		tokenStr := strings.TrimPrefix(authHeader,"Bearer ")
+
+		claims,err := auth.ParseJWT(tokenStr)
+		if err != nil {
+			unauthorizedResponse(c,fmt.Errorf("%s Invalid",USERTOKEN))
+			c.Abort()
+			return 
+		}
+
+		c.Set("userID",claims.UserID)
+		c.Set("email",claims.Email)
+		c.Next()
+	}
 }
