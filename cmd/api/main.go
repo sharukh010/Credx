@@ -28,6 +28,10 @@ func main() {
 		log.Fatalf("Unable to Connect to DB Error: %v\n",err)
 	}
 
+	//migration 
+	db.AutoMigrate(&store.Card{})
+	db.AutoMigrate(&store.User{})
+
 	store := store.NewStorage(db)
 
 	api := &application{

@@ -9,45 +9,25 @@ import (
 	"gorm.io/gorm"
 )
 
-var cardID int64 = 0
+// var cardID int64 = 0
 type Card struct {
-	ID     int64      `json:"id"`
-	UserID int64	  `json:"user_id"`
-	Name   string     `json:"name"`
-	Number string `json:"number"`
-	ExpireAt string `json:"expire_at"`
-	Version int `json:"version"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID     int64      `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserID int64	  `json:"user_id" gorm:"index;not null"`
+	User User `json:"-" gorm:"foreignKey:UserID;references:ID"`
+	Name   string     `json:"name" gorm:"not null"`
+	Number string `json:"number" gorm:"not null; unique"`
+	ExpireAt string `json:"expire_at" gorm:"not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime:nano"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime:nano"`
 }
 
-func (c *Card) SetID(ID int64){
-	c.ID = ID
-}
 
-func (c *Card) SetCreatedAt(t time.Time){
-	c.CreatedAt = t
-}
-
-func (c *Card) SetUpdatedAt(t time.Time){
-	c.UpdatedAt = t 
-}
-
-func (c *Card) updateVersion(){
-	c.Version += 1
-}
 
 func (c *Card) MaskNumber(number string){
 	base := "XXXX"
 	c.Number = strings.Repeat(base,3)
 	c.Number += number
 }
-
-
-// func generateCardID() int64 {
-// 	cardID += 1 
-// 	return cardID
-// }
 
 type CardStore struct {
 	db *gorm.DB
@@ -56,62 +36,56 @@ type CardStore struct {
 
 func (s *CardStore) Add(ctx context.Context,card *Card) error {
 
-	setID(card,&cardID)
-	setCreatedAt(card)
-	setUpdatedAt(card)
-	card.updateVersion()
-
-	Cards = append(Cards, *card)
-
+	result := s.db.Create(card)
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil 
 }
 
 func (s *CardStore) GetAll(ctx context.Context) ([]Card,error){
-	return Cards,nil 
+	cards := []Card{}
+	result := s.db.Order("id ASC").Find(&cards)
+	if result.Error != nil {
+		return nil,result.Error 
+	}
+	return cards,nil  
 }
 
 func (s *CardStore) GetByID(ctx context.Context,ID int64) (*Card,error){
-	for _,card := range Cards {
-		if card.ID == ID {
-			return &card,nil
-		}
+	card := &Card{}
+	result := s.db.Where("id = ?",ID).Find(card)
+	if result.Error != nil {
+		return nil,result.Error 
 	}
-	return nil,sql.ErrNoRows
+	if result.RowsAffected == 0 {
+		return nil,sql.ErrNoRows
+	}
+	return card,nil  
+
 }
 
 func (s *CardStore) Update(ctx context.Context,c *Card) error {
-	var idx int
-	idx = getCardIndex(c.ID)
-	if idx == -1 {
+
+	result := s.db.Where("id = ?",c.ID).Updates(c)
+	if result.Error != nil {
+		return result.Error 
+	}
+	if result.RowsAffected == 0 {
 		return sql.ErrNoRows
 	}
-	c.updateVersion()
-	Cards[idx] = *c 
 	return nil 
 }
 
 func (s *CardStore) Delete(ctx context.Context,ID int64) error {
-	var idx int
-	idx = getCardIndex(ID)
-	if idx == -1 {
+	card := &Card{}
+	result := s.db.Where("id = ?",ID).Delete(card)
+	if result.Error != nil {
+		return result.Error 
+	}
+	if result.RowsAffected == 0 {
 		return sql.ErrNoRows
 	}
-	Cards = append(Cards[:idx],Cards[idx+1:]...)
+	
 	return nil 
-}
-
-func getCardIndex(ID int64) int {
-	var exists bool 
-	var idx int
-	for i,card := range Cards {
-		if card.ID == ID {
-			exists = true
-			idx = i
-			break
-		}
-	}
-	if !exists {
-		return -1
-	}
-	return idx 
 }

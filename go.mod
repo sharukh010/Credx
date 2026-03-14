@@ -9,6 +9,7 @@ require (
 	golang.org/x/crypto v0.48.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
+	gorm.io/plugin/optimisticlock v1.1.3
 )
 
 require (

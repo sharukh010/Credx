@@ -9,18 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
-var UserID int64 = 0 
+var UserID int64 = 0
+
 type User struct {
-	ID       int64    `json:"id"`
-	UserName string   `json:"user_name"`
-	Name     Name     `json:"name"`
-	Gender   string   `json:"gender"`
-	Email    string   `json:"email"`
-	DOB      string   `json:"dob"`
-	Password string `json:"-"`
-	Version int `json:"version"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserName  string    `json:"user_name" gorm:"index unique"`
+	Name      Name      `json:"name" gorm:"embedded"`
+	Gender    string    `json:"gender"`
+	Email     string    `json:"email" gorm:"unique"`
+	DOB       string    `json:"dob"`
+	Password  string    `json:"-"`
+	CreditCards []Card `json:"credit_cards" gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime:nano"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime:nano"`
 }
 
 type Name struct {
@@ -30,54 +31,42 @@ type Name struct {
 
 type UserStore struct {
 	db *gorm.DB
-
 }
 
-func HashPassword(plain string) (string,error) {
-	hash,err := bcrypt.GenerateFromPassword([]byte(plain),bcrypt.DefaultCost)
+func HashPassword(plain string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
 	if err != nil {
-		return "",err 
+		return "", err
 	}
 	hashStr := string(hash)
-	return hashStr,nil 
+	return hashStr, nil
 }
 
-func CompareHashAndPassword(hash,plain string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hash),[]byte(plain))
+func CompareHashAndPassword(hash, plain string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(plain))
 }
 
-func (u *User) SetID(ID int64){
-	u.ID = ID 
-}
 
-func (u *User) SetCreatedAt(t time.Time){
-	u.CreatedAt = t
-}
+func (s *UserStore) Create(ctx context.Context, u *User) error {
 
-func (u *User) SetUpdatedAt(t time.Time){
-	u.UpdatedAt = t 
-}
-
-func (u *User) updateVersion(){
-	u.Version += 1 
-}
-
-func (s *UserStore) Create(ctx context.Context,u *User) error {
-	setID(u,&UserID)
-	setCreatedAt(u)
-	setUpdatedAt(u)
-	u.updateVersion()
-	Users = append(Users, *u)
-	return nil 
-
-}
-
-func (s *UserStore) GetByUserName(ctx context.Context,uname string) (*User,error) {
-	for _,user := range Users {
-		if user.UserName == uname {
-			return &user,nil 
-		}
+	result := s.db.Create(u)
+	if result.Error != nil {
+		return result.Error
 	}
+	return nil
 
-	return nil,sql.ErrNoRows
+}
+
+func (s *UserStore) GetByUserName(ctx context.Context, uname string) (*User, error) {
+	
+	user := &User{}
+
+	result := s.db.Where("user_name = ?",uname).Find(user)
+	if result.Error != nil {
+		return nil,result.Error 
+	}
+	if result.RowsAffected == 0 {
+		return nil,sql.ErrNoRows
+	}
+	return user,nil  
 }
