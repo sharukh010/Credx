@@ -11,6 +11,14 @@ type HealthResponse struct {
 	Version string `json:"version"`
 	Environment string `json:"environment"`
 }
+
+// getHealthHandler godoc
+// @Summary Health check
+// @Description Returns API health information.
+// @Tags health
+// @Produce json
+// @Success 200 {object} HealthResponseDoc
+// @Router /health [get]
 func (app *application) getHealthHandler(c *gin.Context){
 	r := HealthResponse{
 		Status: "Alive",

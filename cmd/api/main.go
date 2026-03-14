@@ -1,3 +1,11 @@
+// @title Credx API
+// @version 1.0
+// @description Swagger documentation for the Credx APIs.
+// @BasePath /v1
+// @schemes http https
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 package main
 
 import (
@@ -7,6 +15,7 @@ import (
 	"github.com/sharukh010/credx/internal/db"
 	"github.com/sharukh010/credx/internal/env"
 	"github.com/sharukh010/credx/internal/store"
+	_ "github.com/sharukh010/credx/docs"
 )
 
 func main() {

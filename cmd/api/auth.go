@@ -42,6 +42,17 @@ type name struct {
 	LastName string `json:"last_name" binding:"required,min=5"`
 }
 
+// userRegistrationHandler godoc
+// @Summary Register user
+// @Description Registers a new user.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body userRegisterRequest true "Registration payload"
+// @Success 201 {object} UserDataResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /auth/register [post]
 func (app *application) userRegistrationHandler(c *gin.Context){
 	r := userRegisterRequest{}
 
@@ -83,6 +94,19 @@ func (app *application) userRegistrationHandler(c *gin.Context){
 	jsonResponse(c,http.StatusCreated,user)
 }
 
+// userLoginHandler godoc
+// @Summary Login user
+// @Description Authenticates a user and returns a JWT token.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body userLoginRequest true "Login payload"
+// @Success 200 {object} LoginDataResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /auth/log-in [get]
 func (app *application) userLoginHandler(c *gin.Context){
 	r := userLoginRequest{}
 

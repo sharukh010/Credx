@@ -1,12 +1,17 @@
 include .env
 
-.PHONY:up-db
+.PHONY: up-db down-db run swagger docs
+
 up-db: 
 	docker compose up --build
 
-.PHONY:down-db 
 down-db: 
 	docker compose down 
 
-run:
+run: swagger
 	air
+
+swagger:
+	swag init -g cmd/api/main.go -o docs
+
+docs: swagger

@@ -22,6 +22,15 @@ type UpdateCardRequest struct {
 	ExpireAt *string `json:"expire_at" binding:"omitempty,min=5,max=5"`
 }
 
+// getCardsHandler godoc
+// @Summary List cards
+// @Description Returns all cards for the authenticated user context used by the application.
+// @Tags cards
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} CardsDataResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /cards/ [get]
 func (app *application) getCardsHandler(c *gin.Context){
 	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
 	defer cancel()
@@ -34,6 +43,17 @@ func (app *application) getCardsHandler(c *gin.Context){
 	jsonResponse(c,http.StatusOK,cards)
 }
 
+// getCardByIDHandler godoc
+// @Summary Get card by ID
+// @Description Returns a card by its ID.
+// @Tags cards
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Card ID"
+// @Success 200 {object} CardDataResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /cards/{id} [get]
 func (app *application) getCardByIDHandler(c *gin.Context){
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {
@@ -57,6 +77,18 @@ func (app *application) getCardByIDHandler(c *gin.Context){
 	jsonResponse(c,http.StatusOK,card)
 }
 
+// addCardHandler godoc
+// @Summary Add card
+// @Description Creates a new card.
+// @Tags cards
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param request body AddCardRequest true "Card payload"
+// @Success 201 {object} CardDataResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /cards/ [post]
 func (app *application) addCardHandler(c *gin.Context){
 	userID := c.Value("userID").(int64)
 	
@@ -84,6 +116,20 @@ func (app *application) addCardHandler(c *gin.Context){
 	jsonResponse(c,http.StatusCreated,card)
 }
 
+// updateCardHandler godoc
+// @Summary Update card
+// @Description Updates card details by ID.
+// @Tags cards
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "Card ID"
+// @Param request body UpdateCardRequest true "Updated card payload"
+// @Success 200 {object} CardDataResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /cards/{id} [patch]
 func (app *application) updateCardHandler(c *gin.Context){
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {
@@ -137,6 +183,17 @@ func (app *application) updateCardHandler(c *gin.Context){
 	jsonResponse(c,http.StatusOK,card)
 }
 
+// deleteCardHandler godoc
+// @Summary Delete card
+// @Description Deletes a card by ID.
+// @Tags cards
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "Card ID"
+// @Success 204 {object} DataResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /cards/{id} [delete]
 func (app *application) deleteCardHandler(c *gin.Context){
 	id,err := strconv.ParseInt(c.Param("id"),10,64)
 	if err != nil {

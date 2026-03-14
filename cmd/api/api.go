@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/sharukh010/credx/internal/store"
 )
 
@@ -37,6 +39,7 @@ type dbConfig struct {
 }
 func (app *application) mount() http.Handler{
 	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := r.Group("/v1")
 	// health route

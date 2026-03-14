@@ -1,0 +1,432 @@
+basePath: /v1
+definitions:
+  main.AddCardRequest:
+    properties:
+      expire_at:
+        maxLength: 5
+        minLength: 5
+        type: string
+      name:
+        minLength: 5
+        type: string
+      number:
+        maxLength: 4
+        minLength: 4
+        type: string
+    required:
+    - expire_at
+    - name
+    - number
+    type: object
+  main.CardDataResponse:
+    properties:
+      data:
+        $ref: '#/definitions/store.Card'
+    type: object
+  main.CardsDataResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/store.Card'
+        type: array
+    type: object
+  main.DataResponse:
+    properties:
+      data: {}
+    type: object
+  main.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  main.Gender:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-varnames:
+    - Male
+    - Female
+  main.HealthResponseDoc:
+    properties:
+      environment:
+        type: string
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+  main.LoginDataResponse:
+    properties:
+      data:
+        $ref: '#/definitions/main.userLoginResponse'
+    type: object
+  main.UpdateCardRequest:
+    properties:
+      expire_at:
+        maxLength: 5
+        minLength: 5
+        type: string
+      name:
+        minLength: 5
+        type: string
+      number:
+        maxLength: 4
+        minLength: 4
+        type: string
+    type: object
+  main.UserDataResponse:
+    properties:
+      data:
+        $ref: '#/definitions/store.User'
+    type: object
+  main.name:
+    properties:
+      first_name:
+        minLength: 5
+        type: string
+      last_name:
+        minLength: 5
+        type: string
+    required:
+    - first_name
+    - last_name
+    type: object
+  main.userLoginRequest:
+    properties:
+      password:
+        description: change it while deploying min=8
+        minLength: 4
+        type: string
+      user_name:
+        minLength: 5
+        type: string
+    required:
+    - password
+    - user_name
+    type: object
+  main.userLoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  main.userRegisterRequest:
+    properties:
+      dob:
+        description: dd/mm/yyyy format
+        maxLength: 10
+        minLength: 10
+        type: string
+      email:
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/main.Gender'
+        maximum: 1
+        minimum: 0
+      name:
+        $ref: '#/definitions/main.name'
+      password:
+        description: change it while deploying min=8
+        minLength: 4
+        type: string
+      user_name:
+        minLength: 5
+        type: string
+    required:
+    - dob
+    - email
+    - password
+    - user_name
+    type: object
+  store.Card:
+    properties:
+      created_at:
+        type: string
+      expire_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      number:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  store.Name:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  store.User:
+    properties:
+      created_at:
+        type: string
+      credit_cards:
+        items:
+          $ref: '#/definitions/store.Card'
+        type: array
+      dob:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        $ref: '#/definitions/store.Name'
+      updated_at:
+        type: string
+      user_name:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Swagger documentation for the Credx APIs.
+  title: Credx API
+  version: "1.0"
+paths:
+  /auth/log-in:
+    get:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token.
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.userLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.LoginDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user.
+      parameters:
+      - description: Registration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.userRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.UserDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Register user
+      tags:
+      - auth
+  /cards/:
+    get:
+      description: Returns all cards for the authenticated user context used by the
+        application.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CardsDataResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List cards
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      description: Creates a new card.
+      parameters:
+      - description: Card payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.AddCardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.CardDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add card
+      tags:
+      - cards
+  /cards/{id}:
+    delete:
+      description: Deletes a card by ID.
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/main.DataResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete card
+      tags:
+      - cards
+    get:
+      description: Returns a card by its ID.
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CardDataResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get card by ID
+      tags:
+      - cards
+    patch:
+      consumes:
+      - application/json
+      description: Updates card details by ID.
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated card payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CardDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update card
+      tags:
+      - cards
+  /health:
+    get:
+      description: Returns API health information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.HealthResponseDoc'
+      summary: Health check
+      tags:
+      - health
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
