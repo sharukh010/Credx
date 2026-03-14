@@ -12,10 +12,15 @@ type Storage struct {
 		Update(context.Context,*Card) error 
 		Delete(context.Context,int64) error 
 	}
+	Users interface {
+		Create(context.Context,*User) error 
+		GetByUserName(context.Context, string) (*User,error)
+	}
 }
 
 func NewStorage() Storage {
 	return Storage{
 		Cards: &CardStore{},
+		Users: &UserStore{},
 	}
 }

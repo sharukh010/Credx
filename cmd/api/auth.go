@@ -1,11 +1,133 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"database/sql"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/sharukh010/credx/internal/auth"
+	"github.com/sharukh010/credx/internal/store"
+)
+
+type Gender int 
+const (
+	Male Gender = iota
+	Female
+)
+type userRegisterRequest struct {
+	UserName string `json:"user_name" binding:"required,min=5"`
+	Name name `json:"name"`
+	Gender Gender `json:"gender" binding:"omitempty,min=0,max=1"`
+	Email string `json:"email" binding:"required,email"`
+	DOB string `json:"dob" binding:"required,min=10,max=10"`// dd/mm/yyyy format 
+	Password string `json:"password" binding:"required,min=4"` // change it while deploying min=8
+}
+
+type userLoginRequest struct {
+	UserName string `json:"user_name" binding:"required,min=5"`
+	Password string `json:"password" binding:"required,min=4"` // change it while deploying min=8
+}
+
+type userLoginResponse struct {
+	 Token string `json:"token"`
+}
+
+type name struct {
+	FirstName string `json:"first_name" binding:"required,min=5"`
+	LastName string `json:"last_name" binding:"required,min=5"`
+}
 
 func (app *application) userRegistrationHandler(c *gin.Context){
-	notImplementedError(c)
+	r := userRegisterRequest{}
+
+	if err := c.BindJSON(&r); err != nil {
+		badRequestResponse(c,err)
+		return 
+	}
+
+	user := &store.User{
+		UserName: r.UserName,
+		Name: store.Name{
+			FirstName: r.Name.FirstName,
+			LastName: r.Name.LastName,
+		},
+		Email: r.Email,
+		DOB: r.DOB,
+	}
+	
+	if r.Gender == 0 {
+		user.Gender = "male"
+	}else{
+		user.Gender = "female"
+	}
+
+	hash,err := store.HashPassword(r.Password)
+	if err != nil {
+		internalServerErrorResponse(c,err)
+		return 
+	}
+	user.Password = hash 
+	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
+	defer cancel()
+
+	if err := app.store.Users.Create(ctx,user); err != nil {
+		internalServerErrorResponse(c,err)
+		return 
+	}
+
+	jsonResponse(c,http.StatusCreated,user)
 }
 
 func (app *application) userLoginHandler(c *gin.Context){
-	notImplementedError(c)
+	r := userLoginRequest{}
+
+	if err := c.BindJSON(&r); err != nil {
+		badRequestResponse(c,err)
+		return 
+	}
+
+	ctx,cancel := context.WithTimeout(c,DatabaseOperationsTimeOut)
+	defer cancel()
+
+	user,err := app.store.Users.GetByUserName(ctx,r.UserName)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			notFoundResponse(c,err)
+			return 
+		default:
+			internalServerErrorResponse(c,err)			
+		}
+		return 
+	}
+
+	if err := store.CompareHashAndPassword(user.Password,r.Password); err != nil {
+		invalidCredentials(c,err)
+		return 
+	}
+
+	claims := auth.Claims{
+		UserID : user.ID,
+		Email: user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt: jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Minute)),//change this while deploying 
+			Issuer: "credx",
+		},
+
+	}
+	token,err := auth.GenerateJWT(claims)
+	if err != nil {
+		internalServerErrorResponse(c,err)
+		return 
+	}
+
+	response := userLoginResponse{
+		Token: token,
+	}
+
+	jsonResponse(c,http.StatusOK,response)
 }
