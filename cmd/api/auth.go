@@ -147,7 +147,7 @@ func (app *application) userLoginHandler(c *gin.Context){
 	}
 	token,err := auth.GenerateJWT(claims,app.config.JWTSecret)
 	if err != nil {
-		internalServerErrorResponse(c,err)
+		unauthorizedResponse(c,err)
 		return 
 	}
 
