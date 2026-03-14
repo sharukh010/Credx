@@ -58,7 +58,7 @@ func (app *application) mount() http.Handler{
 	auth := v1.Group("/auth")
 
 	auth.POST("/register",app.userRegistrationHandler) // rotue to register user
-	auth.GET("/log-in",app.userLoginHandler)
+	auth.POST("/log-in",app.userLoginHandler)
 
 
 	return r 

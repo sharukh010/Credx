@@ -106,7 +106,7 @@ func (app *application) userRegistrationHandler(c *gin.Context){
 // @Failure 404 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
-// @Router /auth/log-in [get]
+// @Router /auth/log-in [post]
 func (app *application) userLoginHandler(c *gin.Context){
 	r := userLoginRequest{}
 
